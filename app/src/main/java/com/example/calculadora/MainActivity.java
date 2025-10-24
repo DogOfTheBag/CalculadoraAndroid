@@ -326,7 +326,8 @@ public class MainActivity extends AppCompatActivity {
     * lo que hace es quitar ese .0 de los numeros asi, los demas los deja*/
     private String limpiarResultado (double numero){
         String resultadoLimpio;
-
+        /*el value of hace un poco como el toString, pero es más seguro a la hora de convertir valores primitivos para evitar errores
+        * si haces un toString puede lanzar NullPointerException o errores del palo y este tira mejor*/
         resultadoLimpio = String.valueOf(numero);
         if(resultadoLimpio.endsWith(".0")) resultadoLimpio = resultadoLimpio.substring(0, resultadoLimpio.length()-2);
 
