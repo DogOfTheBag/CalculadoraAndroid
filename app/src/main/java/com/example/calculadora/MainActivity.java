@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
     StringBuilder sb1;
     StringBuilder sb2;
     static int foco = 1; //foco en el text 1 o 2
-    private editText num1, num2, resultado;
+    private EditText num1, num2, resultado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
 /*Comenzamos definiendo todos los elementos que vayamos a usar para poder manejarlos prgramando*/
 
+        sb1 = new StringBuilder();
+        sb2 = new StringBuilder();
         Button boton0 = findViewById(R.id.button0);
         Button boton1 = findViewById(R.id.button1);
         Button boton2 = findViewById(R.id.button2);
@@ -43,15 +46,15 @@ public class MainActivity extends AppCompatActivity {
         Button boton9 = findViewById(R.id.button9);
         Button botonClear = findViewById(R.id.buttonClear);
         Button botonDel = findViewById(R.id.buttonDel);
-       //Button botonSqrt = findViewById(R.id.buttonsqrt);
+        Button botonSqrt = findViewById(R.id.buttonsqrt);
         Button botonDiv = findViewById(R.id.buttonDiv);
         Button botonMult = findViewById(R.id.buttonMult);
         Button botonResta = findViewById(R.id.buttonResta);
         Button botonSuma = findViewById(R.id.buttonSuma);
         Button botonPunto = findViewById(R.id.buttonPunto);
-        EditText num1 = findViewById(R.id.num1);
-        EditText num2 = findViewById(R.id.num2);
-        EditText resultado = findViewById(R.id.resultado);
+        num1 = findViewById(R.id.num1);
+        num2 = findViewById(R.id.num2);
+        resultado = findViewById(R.id.resultado);
 
         /*Para que cuando pulsemos un número, el programa sepa donde tiene que ir escrito eso
         * tendremos que establecer una variable que indique al listener de los botones donde se supone
@@ -60,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
         * si pulsa en el primer texto, el listener del foco le pasará un 1 al programa, y este lo tendrá listo
         * para cuando pulses los botones, que comprobarán donde están, y pulsaran acorde.*/
 
-
+        /*basicamente escuchamos el cambio de foco. Con un if comprobamos si el texto actual tiene el foco
+        * si lo tiene le diremos con un numero que texto tiene el foco, y escribiremos posteriormente ahi*/
         num1.setOnFocusChangeListener(new View.OnFocusChangeListener(){
             @Override
             public void onFocusChange(View v ,boolean hasFocus){
@@ -120,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-
+        /*Le metemos el listener generico a todos los botones de numeros*/
         boton0.setOnClickListener(digitListener);
         boton1.setOnClickListener(digitListener);
         boton2.setOnClickListener(digitListener);
@@ -156,7 +160,42 @@ public class MainActivity extends AppCompatActivity {
             }
         }); //final listener
 
+        /*vamos a hacer la raiz cuadrada. La mayor complicación que tiene este listener es primero
+        * comprobar si el numero que le introducimos es válido para hacer la raiz. Como siempre, comprobamos el foco
+        * y con la funcion de la clase Math tiramos el sqrt facilito
+        *
+        * Uso aquí la funcion que quita el .0 del resultado, está abajo para referencia*/
+        botonSqrt.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                try{
+                    if (foco == 1){
+                        if(sb1.length() == 0) return;
+                        double x = Double.parseDouble(sb1.toString());
+                        if(x<0){
+                            toast("no se puede hacer un sqrt con negativos");
+                            return;
+                        }
+                        toast("El resultado abajo");
+                        resultado.setText(limpiarResultado(Math.sqrt(x)));
+                    }else{
+                        if(sb2.length() == 0) return;
+                        double x = Double.parseDouble(sb2.toString());
+                        if(x<0){
+                            toast("no se puede hacer un sqrt con negativos");
+                            return;
+                        }
+                        toast("El resultado abajo");
+                        resultado.setText(limpiarResultado(Math.sqrt(x)));
+                    }
+                }catch (NumberFormatException e){
+                    toast("Número invalido");
+                }
+            }
+        });
 
+        /*el delete de toda la vida, basicamente se va al final de la cadena en foco y borra el ultimo numero
+        * aunque selecciones la mitad de la cadena borra el ultimo, lo he pensado asi en vez de dejar que borren entre medias.*/
         botonDel.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick (View v){
@@ -186,7 +225,42 @@ public class MainActivity extends AppCompatActivity {
                 foco = 1;
             }
         });
+        //LISTENERS DE LAS OPERACIONES
+        /*Voy a usar la funcion de operar que le pasas el operador y te hace la cuenta, abajo esta explicada*/
+        botonSuma.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                operar('+');
+            }
+        });
 
+        botonResta.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                operar('-');
+            }
+        });
+
+        botonMult.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                operar('*');
+            }
+        });
+
+        botonDiv.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                operar('/');
+            }
+        });
+    } /*AQUI ACABA EL ON CREATE, EN EL ON CREATE SOLO METEMOS LO QUE QUERAMOS QUE SE CREE AL ABRIR LA APP
+        ESO QUIERE DECIR QUE FUNCIONES AUXILIARES Y ESO FUERA, AQUI DENTRO LOS LISTENERS, FOCOS, BOTONES, VARIABLES QUE SE USEN FUERA TAMBIEN AL PRINCIPIO */
+
+
+
+        /*Voy a hacer aquí abajo las funciones internas que estamos usando, como la de operar, la de si tiene punto...*/
+        /*********************************************FUNCIONES AUXILIARES*********************************************/
 
 
 /*        EJEMPLO DE EVENTO
@@ -199,5 +273,69 @@ public class MainActivity extends AppCompatActivity {
         });
 * */
 
+    /*Creo que la he explicado antes pero esta funcion busca si hay ya un punto de decimal, si lo hay no te deja poner otro*/
+    private Boolean noTienePunto(StringBuilder sb){
+        for (int i = 0; i < sb.length(); i++) {
+            if(sb.charAt(i) == '.')
+                return false;
+        }
+        return true;
+    }
+
+    /*La funcion de las operaciones, un switch que dependiendo del boton que hayas pulsado hace una operación*/
+    private void operar(char op){
+        if(sb1.length() == 0 || sb2.length() == 0) {
+            toast("Tienen que haber números en ambos textos para operar");
+            return;
+        }
+        try {
+            double a = Double.parseDouble(sb1.toString());
+            double b = Double.parseDouble(sb2.toString());
+            double r;
+            switch (op) {
+                case '+':
+                    r = a + b;
+                    break;
+
+                case '-':
+                    r = a - b;
+                    break;
+
+                case '*':
+                    r = a * b;
+                    break;
+                //No le dejamos dividir entre 0 que la gente es muy mala
+                case '/':
+                    if (b == 0) {
+                        toast("No se puede dividir entre 0.");
+                        return;
+                    }
+                    r = a / b;
+                    break;
+
+                default:
+                    return;
+            }
+            resultado.setText(limpiarResultado(r));
+        }catch(NumberFormatException e){
+            toast("Solo podemos manejar numeros.");
+        }
+    }
+
+    /*Esta funcion lo que hace es que si el resultado te salgo 475, como es double te va a salir como 475.0
+    * lo que hace es quitar ese .0 de los numeros asi, los demas los deja*/
+    private String limpiarResultado (double numero){
+        String resultadoLimpio;
+
+        resultadoLimpio = String.valueOf(numero);
+        if(resultadoLimpio.endsWith(".0")) resultadoLimpio = resultadoLimpio.substring(0, resultadoLimpio.length()-2);
+
+        return resultadoLimpio;
+    }
+
+    /*He encontrado esto de los Toast, que basicamente son notifiaciones modales, parecidas a JOptionPane en Swing
+    * o sea que si tengo algo de error para el usuario puedo usar esto, le pasas el mensaje en la funcion y te la lanza*/
+    private void toast(String m) {
+        Toast.makeText(this, m, Toast.LENGTH_SHORT).show();
     }
 }
