@@ -109,12 +109,12 @@ public class MainActivity extends AppCompatActivity {
                     * te borra el 0 y te queda 1 solo*/
                     if (sb1.length() == 1 && sb1.charAt(0) == '0') sb1.setLength(0);
                         /*juntamos el numero al StringBuilder que tenemos y lo establecemos como texto*/
-                        sb1.append(d);
-                        num1.setText(sb1.toString());
+                    sb1.append(d);
+                    num1.setText(sb1.toString());
                         /*Esta linea la hacemos para que cuando introduzcamos el numero, se recoloque la barra
                         * donde escribamos el siguiente al final de lo escrito, si no se va al principio
                         * Podriamos usar sb1.getLenght() pero esto es mejor ya que usamos el texto que se ve y nos evitamos errores*/
-                        num1.setSelection(num1.getText().length());
+                    num1.setSelection(num1.getText().length());
 
                      } else{
                     if (sb2.length() == 1 && sb2.charAt(0) == '0') sb2.setLength(0);
